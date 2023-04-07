@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta, timezone
 from urllib.request import urlopen
 import io
 from hashlib import md5
@@ -70,7 +71,6 @@ def download_file_and_upload_to_s3(aws_s3_client, bucket_name, url, s3_region=No
 
 
 def multipart_upload(aws_s3_client, bucket_name, file_path, file_name, content_type):
-
     # https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html
     PART_BYTES = 5 * 1024 * 1024
     mpu = aws_s3_client.create_multipart_upload(Bucket=bucket_name, Key=file_name, ContentType=content_type)
@@ -177,3 +177,17 @@ def upload_file_with_mime(s3_client, bucket_name, file_path: str) -> bool:
         return True
     except ClientError as e:
         return False
+
+
+def delete_old_file_versions(s3_client, bucket_name, file_name, keep_days) -> bool:
+    try:
+        versions = s3_client.list_object_versions(Bucket=bucket_name, Prefix=file_name)
+        date_expired = datetime.now(timezone.utc) - timedelta(days=keep_days)
+
+        for version in versions['Versions']:
+            if version['LastModified'] < date_expired:
+                s3_client.delete_object(Bucket=bucket_name, Key=file_name, VersionId=version['VersionId'])
+        return True
+    except ClientError as e:
+        return False
+

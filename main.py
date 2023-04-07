@@ -6,7 +6,7 @@ from bucket.policy import read_bucket_policy, assign_policy
 from bucket.versioning import versioning
 from bucket.encryption import set_bucket_encryption, read_bucket_encryption
 from bucket.organize import object_per_extension
-from object.crud import download_file_and_upload_to_s3, get_objects, upload_local_file, upload_file_with_mime
+from object.crud import download_file_and_upload_to_s3, get_objects, upload_local_file, upload_file_with_mime, delete_old_file_versions
 from object.versioning import list_object_versions, rollback_to_version
 from my_args import bucket_arguments, object_arguments
 import argparse
@@ -94,6 +94,10 @@ def main():
             if args.upload_file_with_mime:
                 if upload_file_with_mime(s3_client, args.bucket_name, args.file_path):
                     print("Successfully uploaded")
+
+            if args.delete_expired_versions:
+                if delete_old_file_versions(s3_client, args.bucket_name, args.file_name, args.keep_days):
+                    print("Successfully deleted expired versions")
 
         case "list_buckets":
             buckets = list_buckets(s3_client)

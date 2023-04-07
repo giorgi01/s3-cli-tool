@@ -225,7 +225,24 @@ def object_arguments(parser):
         '-up-file',
         '--upload_file_with_mime',
         type=bool,
-        default=True,
         help='Upload file with mime')
+
+    parser.add_argument(
+        '-del-exp-ver',
+        '--delete_expired_versions',
+        type=bool,
+        default=True,
+        help='Delete expired versions of file')
+
+    parser.add_argument(
+        '--file_name',
+        type=str,
+        help='the name of the file to delete versions for')
+
+    parser.add_argument(
+        '--keep-days',
+        type=int,
+        default=180,
+        help='the number of days to keep version, default is 180 days (6 months)')
 
     return parser
